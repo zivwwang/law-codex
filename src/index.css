@@ -1,0 +1,60 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --color-bg: #fafaf8;
+  --color-surface: #ffffff;
+  --color-border: #e2e2dd;
+  --color-text: #1a1a18;
+  --color-text-muted: #6b6b65;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-annotation-bg: #f0f9ff;
+  --color-annotation-border: #bae6fd;
+
+  font-family: 'Noto Serif TC', 'Source Han Serif TC', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Markdown 渲染樣式 */
+.markdown-body {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.markdown-body p { margin: 0.5em 0; }
+.markdown-body code {
+  background: #f3f4f6;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+.markdown-body blockquote {
+  border-left: 3px solid var(--color-accent);
+  margin: 0.5em 0;
+  padding-left: 1em;
+  color: var(--color-text-muted);
+}
