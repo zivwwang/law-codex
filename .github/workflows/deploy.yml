@@ -26,6 +26,12 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      - name: Fetch law JSON data
+        run: |
+          PCODES=$(ls laws/ | grep -E '^[A-Z][0-9]{7}$' | tr '\n' ' ')
+          if [ -n "$PCODES" ]; then node scripts/fetch-laws.js $PCODES; fi
+
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
