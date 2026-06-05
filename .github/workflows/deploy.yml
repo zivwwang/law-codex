@@ -27,10 +27,8 @@ jobs:
 
       - run: npm ci
 
-      - name: Fetch law JSON data
-        run: |
-          PCODES=$(ls laws/ | grep -E '^[A-Z][0-9]{7}$' | tr '\n' ' ')
-          if [ -n "$PCODES" ]; then node scripts/fetch-laws.js $PCODES; fi
+      - name: Build law JSON from local data
+        run: node scripts/build-law-json.js
 
       - run: npm run build
 
