@@ -1,0 +1,60 @@
+.tree {
+  padding: 0.5rem;
+}
+
+.lawGroup {
+  margin-bottom: 0.25rem;
+}
+
+.lawHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.lawHeader:hover {
+  background: var(--color-bg);
+}
+
+.caret {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  width: 1em;
+}
+
+.articleList {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1.4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.articleLink {
+  display: block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.articleLink:hover {
+  background: var(--color-bg);
+  text-decoration: none;
+}
+
+.active {
+  background: var(--color-annotation-bg);
+  color: var(--color-accent);
+  font-weight: 600;
+}

@@ -27,9 +27,6 @@ jobs:
 
       - run: npm ci
 
-      - name: Build law JSON from local data
-        run: node scripts/build-law-json.js
-
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3

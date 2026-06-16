@@ -122,7 +122,7 @@ export default function UpdateButton() {
         onClick={handleClick}
         disabled={status === 'loading'}
       >
-        {status === 'loading' ? '觸發中…' : '更新法規'}
+        {status === 'loading' ? '檢查中…' : '檢查是否有新法施行'}
       </button>
       {sessionStorage.getItem(TOKEN_KEY) && (
         <button className={styles.link} onClick={handleReset} title="清除已儲存的 Token">
