@@ -22,6 +22,12 @@ from pathlib import Path
 # Windows PowerShell 預設 cp1252，強制 UTF-8
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+def _log(*args, **kwargs):
+    """進度訊息一律輸出到 stderr，讓 stdout 只有 JSON。"""
+    print(*args, **kwargs, file=sys.stderr)
 
 SCRIPTS_DIR = Path(__file__).parent
 LAWS_DIR    = SCRIPTS_DIR.parent / "laws"
@@ -39,10 +45,10 @@ def _load_laws_data(use_cache: bool) -> list:
     cache_path = CACHE_DIR / "ChLaw.json"
 
     if use_cache and cache_path.exists():
-        print(f"使用快取：{cache_path}", flush=True)
+        _log(f"使用快取：{cache_path}", flush=True)
         raw = cache_path.read_bytes()
     else:
-        print("下載 ChLaw.json.zip（約 6 MB）…", flush=True)
+        _log("下載 ChLaw.json.zip（約 6 MB）…", flush=True)
         req = urllib.request.Request(API_URL, headers={"User-Agent": "check_updates/1.0"})
         with urllib.request.urlopen(req, timeout=120) as resp:
             raw_zip = resp.read()
@@ -50,15 +56,15 @@ def _load_laws_data(use_cache: bool) -> list:
             json_name = next((n for n in zf.namelist() if n.lower().endswith(".json")), None)
             if not json_name:
                 raise RuntimeError(f"ZIP 內找不到 JSON，內含：{zf.namelist()}")
-            print(f"解壓 {json_name}…", flush=True)
+            _log(f"解壓 {json_name}…", flush=True)
             raw = zf.read(json_name)
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         cache_path.write_bytes(raw)
-        print(f"已快取至 {cache_path}", flush=True)
+        _log(f"已快取至 {cache_path}", flush=True)
 
     data = json.loads(raw.decode("utf-8-sig"))
     laws = data.get("Laws", data) if isinstance(data, dict) else data
-    print(f"共 {len(laws)} 筆法規資料。\n", flush=True)
+    _log(f"共 {len(laws)} 筆法規資料。\n", flush=True)
     return laws
 
 
@@ -90,7 +96,7 @@ def _read_local_metas() -> list[dict]:
             data["_meta_path"] = str(meta_path)
             metas.append(data)
         except Exception as e:
-            print(f"警告：讀取 {meta_path} 失敗：{e}", flush=True)
+            _log(f"警告：讀取 {meta_path} 失敗：{e}", flush=True)
     return metas
 
 
@@ -103,10 +109,10 @@ def check(use_cache: bool) -> list[dict]:
     """
     metas = _read_local_metas()
     if not metas:
-        print("laws/ 目錄下沒有任何 meta.json，請先執行 fetch_laws.py。")
+        _log("laws/ 目錄下沒有任何 meta.json，請先執行 fetch_laws.py。")
         return []
 
-    print(f"本地共追蹤 {len(metas)} 部法規。", flush=True)
+    _log(f"本地共追蹤 {len(metas)} 部法規。", flush=True)
     api_index = _load_laws_data(use_cache)
     api_index = _build_api_index(api_index)
 
@@ -134,7 +140,7 @@ def check(use_cache: bool) -> list[dict]:
             })
 
     if not_found:
-        print(f"警告：以下 PCode 在 API 中找不到：{', '.join(not_found)}\n")
+        _log(f"警告：以下 PCode 在 API 中找不到：{', '.join(not_found)}\n")
 
     return updates
 
@@ -145,7 +151,7 @@ def fetch_updates(pcodes: list[str], use_cache: bool) -> bool:
     """呼叫 fetch_laws.py 更新指定法規，回傳是否全部成功。"""
     cache_arg = [] if use_cache else ["--no-cache"]
     cmd = [sys.executable, str(FETCH_SCRIPT)] + cache_arg + pcodes
-    print(f"\n執行：{' '.join(cmd)}\n", flush=True)
+    _log(f"\n執行：{' '.join(cmd)}\n", flush=True)
     result = subprocess.run(cmd)
     return result.returncode == 0
 
@@ -153,10 +159,10 @@ def fetch_updates(pcodes: list[str], use_cache: bool) -> bool:
 # ── 輸出格式 ──────────────────────────────────────────────────────────────────
 
 def _print_table(updates: list[dict]) -> None:
-    print(f"{'PCode':<12} {'法規名稱':<20} {'本地日期':<12} {'API 日期':<12}")
-    print("-" * 58)
+    _log(f"{'PCode':<12} {'法規名稱':<20} {'本地日期':<12} {'API 日期':<12}")
+    _log("-" * 58)
     for u in updates:
-        print(f"{u['pcode']:<12} {u['name']:<20} {u['local_date']:<12} {u['api_date']:<12}")
+        _log(f"{u['pcode']:<12} {u['name']:<20} {u['local_date']:<12} {u['api_date']:<12}")
 
 
 # ── 主程式 ────────────────────────────────────────────────────────────────────
@@ -172,7 +178,7 @@ def main() -> None:
     except Exception as e:
         msg = f"錯誤：{e}"
         if json_mode:
-            print(json.dumps({"error": str(e), "updates": []}, ensure_ascii=False))
+            print(json.dumps({"error": str(e), "count": 0, "updates": []}, ensure_ascii=False))
         else:
             print(msg, file=sys.stderr)
         sys.exit(2)
@@ -187,12 +193,12 @@ def main() -> None:
 
     # ── 人類可讀模式 ──────────────────────────────────────────────────────────
     if not updates:
-        print("所有法規均為最新版本，無須更新。")
+        _log("所有法規均為最新版本，無須更新。")
         sys.exit(0)
 
-    print(f"\n發現 {len(updates)} 部法規有更新：\n")
+    _log(f"\n發現 {len(updates)} 部法規有更新：\n")
     _print_table(updates)
-    print()
+    _log()
 
     pcodes = [u["pcode"] for u in updates]
 
@@ -212,7 +218,7 @@ def main() -> None:
             success = fetch_updates(pcodes, use_cache)
             sys.exit(0 if success else 2)
         else:
-            print("已略過，未執行更新。")
+            _log("已略過，未執行更新。")
             sys.exit(1)
 
 
