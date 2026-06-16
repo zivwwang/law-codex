@@ -1,0 +1,83 @@
+name: Update Laws
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_fetch:
+        description: "強制 fetch 所有追蹤的法規（不論是否有更新）"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 比對法規異動日期
+        id: check
+        run: |
+          python scripts/check_updates.py --json --no-cache > check_result.json || true
+          cat check_result.json
+          COUNT=$(python -c "import json,sys; print(json.load(open('check_result.json'))['count'])")
+          echo "update_count=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Fetch 更新的法規
+        if: steps.check.outputs.update_count != '0' || inputs.force_fetch == 'true'
+        run: |
+          if [ "${{ inputs.force_fetch }}" = "true" ]; then
+            # 取得所有追蹤的 pcode
+            PCODES=$(python -c "
+          import json, glob
+          pcodes = [json.load(open(p))['pcode'] for p in glob.glob('laws/*/meta.json')]
+          print(' '.join(pcodes))
+          ")
+            python scripts/fetch_laws.py --no-cache $PCODES
+          else
+            PCODES=$(python -c "
+          import json
+          data = json.load(open('check_result.json'))
+          print(' '.join(u['pcode'] for u in data['updates']))
+          ")
+            python scripts/fetch_laws.py --no-cache $PCODES
+          fi
+
+      - name: Commit 更新的法規資料
+        if: steps.check.outputs.update_count != '0' || inputs.force_fetch == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add laws/
+          if git diff --cached --quiet; then
+            echo "沒有變更需要 commit。"
+          else
+            DATE=$(date -u +"%Y-%m-%d")
+            COUNT=${{ steps.check.outputs.update_count }}
+            git commit -m "chore: 更新法規資料 ${DATE}（${COUNT} 部）"
+            git push
+          fi
+
+      - name: 結果摘要
+        run: |
+          COUNT=${{ steps.check.outputs.update_count }}
+          if [ "$COUNT" = "0" ]; then
+            echo "### 法規檢查完成" >> $GITHUB_STEP_SUMMARY
+            echo "所有法規均為最新版本，無須更新。" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 已更新 ${COUNT} 部法規" >> $GITHUB_STEP_SUMMARY
+            python -c "
+          import json
+          data = json.load(open('check_result.json'))
+          print('| PCode | 法規名稱 | 本地日期 | 最新日期 |')
+          print('|---|---|---|---|')
+          for u in data['updates']:
+              print(f\"| {u['pcode']} | {u['name']} | {u['local_date']} | {u['api_date']} |\")
+          " >> $GITHUB_STEP_SUMMARY
+          fi

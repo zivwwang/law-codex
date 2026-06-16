@@ -19,6 +19,12 @@
   height: 56px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
 }
 
 .logo {

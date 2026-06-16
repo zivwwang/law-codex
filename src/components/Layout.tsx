@@ -1,5 +1,6 @@
 import { Outlet, Link } from 'react-router-dom'
 import styles from './Layout.module.css'
+import UpdateButton from './UpdateButton'
 
 export default function Layout() {
   return (
@@ -7,6 +8,9 @@ export default function Layout() {
       <header className={styles.header}>
         <nav className={styles.nav}>
           <Link to="/" className={styles.logo}>⚖ 個人線上法典</Link>
+          <div className={styles.navRight}>
+            <UpdateButton />
+          </div>
         </nav>
       </header>
       <main className={styles.main}>
