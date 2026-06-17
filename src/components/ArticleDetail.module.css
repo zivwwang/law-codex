@@ -20,16 +20,6 @@
   margin: 0.15rem 0 0;
 }
 
-.lawText {
-  background: var(--color-readonly-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1.25rem 1.5rem;
-  white-space: pre-wrap;
-  line-height: 1.9;
-  color: var(--color-text);
-}
-
 .annotation {
   margin-top: 1.5rem;
 }
@@ -41,9 +31,4 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 0.5rem;
-}
-
-.empty {
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
 }

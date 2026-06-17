@@ -1,0 +1,32 @@
+.root {
+  background: var(--color-readonly-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  line-height: 1.9;
+  color: var(--color-text);
+}
+
+.paragraph + .paragraph {
+  margin-top: 0.75rem;
+}
+
+.paragraphText {
+  margin: 0;
+}
+
+.paragraphLabel {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-right: 0.5em;
+}
+
+.items {
+  margin-top: 0.35rem;
+  padding-left: 1.75rem;
+}
+
+.item {
+  margin: 0.2rem 0;
+}

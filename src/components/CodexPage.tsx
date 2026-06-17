@@ -4,6 +4,7 @@ import LawTree from './LawTree'
 import ArticleDetail from './ArticleDetail'
 import UpdateButton from './UpdateButton'
 import ExportPdfButton from './ExportPdfButton'
+import ExportLawButton from './ExportLawButton'
 import styles from './CodexPage.module.css'
 
 export default function CodexPage() {
@@ -22,6 +23,7 @@ export default function CodexPage() {
         <div className={styles.toolbarActions}>
           <UpdateButton />
           <ExportPdfButton disabled={!law || !article} />
+          <ExportLawButton law={law} />
         </div>
       </div>
       <div className={styles.body}>

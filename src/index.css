@@ -60,7 +60,14 @@ a:hover {
   color: var(--color-text-muted);
 }
 
-/* 匯出 PDF：window.print() 只印出 #print-area（目前選中的條文） */
+.annotation-empty {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+/*
+ * 匯出 PDF：預設只印出 #print-area（目前選中的條文）。
+ */
 @media print {
   body * {
     visibility: hidden;
@@ -74,5 +81,18 @@ a:hover {
     inset: 0;
     overflow: visible;
     padding: 0;
+  }
+
+  /*
+   * 整部法典匯出時，#print-full-law 透過 React portal 直接掛在 <body> 下
+   * （脫離 #root）。把 #root 整個收起（display:none，而非僅 visibility:hidden），
+   * 否則目錄樹等隱藏內容仍會占用版面高度，印出大量空白頁。
+   */
+  body.print-mode-law #root {
+    display: none !important;
+  }
+  body.print-mode-law #print-full-law,
+  body.print-mode-law #print-full-law * {
+    visibility: visible;
   }
 }

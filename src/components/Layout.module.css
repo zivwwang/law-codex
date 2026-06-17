@@ -42,3 +42,6 @@
   font-size: 0.8rem;
   color: var(--color-text-muted);
 }
+.footer p {
+  margin: 0.2rem 0;
+}

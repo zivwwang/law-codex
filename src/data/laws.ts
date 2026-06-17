@@ -126,3 +126,38 @@ export function resolveWikiToken(token: string): { pcode: string; articleId: str
   const articleId = parts.length > 1 ? `${main}-${parts.slice(1).join('-')}` : main
   return { pcode, articleId }
 }
+
+export interface LawParagraph {
+  /** 該項本文 */
+  text: string
+  /** 該項下的款（原文已含「一、」「二、」… 編號） */
+  items: string[]
+}
+
+const ITEM_RE = /^[一二三四五六七八九十百千萬零]+(?:之[一二三四五六七八九十百千萬零]+)?、/
+
+/**
+ * 全國法規資料庫的條文原文以換行分隔「項」，款則是項內以「一、二、…」
+ * 開頭的子行。把原文切成 { 項本文, 款列表 } 的結構供畫面標示項/款。
+ */
+export function parseLawText(content: string): LawParagraph[] {
+  const paragraphs: LawParagraph[] = []
+
+  for (const rawLine of content.split('\n')) {
+    const line = rawLine.trim()
+    if (!line) continue
+
+    if (ITEM_RE.test(line)) {
+      const current = paragraphs[paragraphs.length - 1]
+      if (current) {
+        current.items.push(line)
+      } else {
+        paragraphs.push({ text: '', items: [line] })
+      }
+    } else {
+      paragraphs.push({ text: line, items: [] })
+    }
+  }
+
+  return paragraphs
+}

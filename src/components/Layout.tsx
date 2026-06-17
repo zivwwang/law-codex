@@ -14,6 +14,7 @@ export default function Layout() {
       </main>
       <footer className={styles.footer}>
         <p>法條來源：<a href="https://law.moj.gov.tw" target="_blank" rel="noreferrer">全國法規資料庫</a></p>
+        <p>網站最後更新：{__LAST_UPDATED__}</p>
       </footer>
     </div>
   )
